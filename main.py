@@ -1,26 +1,56 @@
 from collections import defaultdict
+import pandas as pd
+from math import sin, cos, sqrt, atan2, radians
+import numpy as np
+from random import randint
 
-custo_arestas = [
-    [1, 2, 3, 4],
-    [5, 6, 7, 8],
-    [9, 10, 11, 12],
-    [13, 14, 15, 16]
-]
+# Numero de produtos que serão transportados
+N = 100
 
-fi_arestas = [
-    [1, 1, 1, 1],
-    [1, 1, 1, 1],
-    [1, 1, 1, 1],
-    [1, 1, 1, 1],
-]
+# Inicializa matrizes com zeros
+dist_arestas = np.zeros((len(lat), len(lat)))
+fi_arestas = np.zeros((len(lat), len(lat)))
 
-nos = [1, 2, 3, 4]
+# Inicializa vetores com origens e destinos dos produtos
+src = []
+dest = []
 
-N = 4
+# Lendo dados do arquivo gerado para o problema 1
+df = pd.read_csv("cidades.csv")
+df = df.head(15)
+lat = df["latitude"]
+long = df["longitude"]
 
-src = [0, 1, 2, 3]
-dest = [3, 2, 1, 0]
+# Funcao que calcula a distancia entre duas cidades dadas as coordenadas
+def dist(lat1, lon1, lat2, lon2):
+    R = 6373.0
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    distance = R * c
+    return distance
 
+# Insere a distancia entre cada cidade na matriz
+for i in range(len(lat)):
+    for j in range(len(lat)):
+        dist_arestas[i][j] = dist(lat[i], long[i], lat[j], long[j])
+        fi_arestas[i][j] = 1
+
+custo_arestas = dist_arestas
+
+# Funcao que gera lista aleatoria de produtos com origem e destino (seria fornecido diariamente pela Loggi)
+for i in range(N):
+    src.append(randint(0, len(dist_arestas) - 1))
+
+    # Verifica se origem == destino
+    destRand = randint(0, len(dist_arestas) - 1)
+    while(destRand == src[i]):
+        destRand = randint(0, len(dist_arestas) - 1)
+
+    dest.append(destRand)
+
+# Classe utilizada para representar um grafo
 class Graph:
 
     def minDistance(self, dist, queue):
@@ -43,7 +73,7 @@ class Graph:
 
     def printSolution(self, dist, parent, src, dest):
         path = []
-        self.printPath(parent,dest, path)
+        self.printPath(parent, dest, path)
         return path
 
     def dijkstra(self, graph, src, dest):
@@ -70,35 +100,38 @@ class Graph:
         path = self.printSolution(dist, parent, src, dest)
         return path
 
-
+# Funcao para o valor de uma aresta dada a distancia entre vertices e fluxo
 def valor_aresta(d, fi):
     return 1.178175 * d / fi
 
+# Funcao que recalcula todas as arestas
 def calcula_arestas():
     for i in range(len(custo_arestas)):
         for j in range(len(custo_arestas[0])):
             custo_arestas[i][j] = valor_aresta(
-                dist(nos[i], nos[j]), fi_arestas[i][j])
+                dist_arestas[i][j], fi_arestas[i][j])
 
-def dist(nodeA, nodeB):
-    return 10
-
+# Retorna a matriz de fluxos dado um caminho
 def calcula_fi(path):
     length = len(path)
     for i in range(length - 1):
         fi_arestas[path[i]][path[i+1]] += 1
         fi_arestas[path[i+1]][path[i]] += 1
 
+# Funcao main
 def main():
     g = Graph()
 
+    # Quao maior o valor utilizado no iterador maior a precisão do resultado
     for i in range(10):
+        # Recalcula arestas
         calcula_arestas()
 
+        # Para cada produto calcula o caminho mais barato
         for j in range(N):
             path = g.dijkstra(custo_arestas, src[j], dest[j])
+            print(path)
             calcula_fi(path)
 
-    
 
 main()
