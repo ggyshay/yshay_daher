@@ -149,11 +149,11 @@ def calculate_routes(N):
 
     return rotas
 
-@app.route('/routing', methods=['POST'])
-def routing():
-    N = int(request.form['number_of_products'])
-    rotas = calculate_routes(N)
+@app.route('/routing/<int:quant>', methods=['GET'])
+def routing(quant):
+    #N = int(request.form['number_of_products'])
+    rotas = calculate_routes(quant)
     return jsonify(rotas)
 
 if __name__ == '__main__':
-    app.run(debug=True,host='0.0.0.0',port=80)
+    app.run(debug=True,host='0.0.0.0',port=8080)
