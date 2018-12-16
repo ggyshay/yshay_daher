@@ -4,9 +4,11 @@ from math import sin, cos, sqrt, atan2, radians
 import numpy as np
 from random import randint
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 # Iniciando o Flask
 app = Flask(__name__)
+CORS(app)
 
 # Lendo dados do arquivo gerado para o problema 1
 df = pd.read_csv("cidades.csv")
