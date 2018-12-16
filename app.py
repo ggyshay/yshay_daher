@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 # Lendo dados do arquivo gerado para o problema 1
 df = pd.read_csv("cidades.csv")
-df = df.head(15)
+df = df.head(50)
 lat = df["latitude"]
 long = df["longitude"]
 
@@ -42,7 +42,6 @@ custo_arestas = dist_arestas
 
 # Classe utilizada para representar um grafo
 class Graph:
-
     def minDistance(self, dist, queue):
         minimum = float("Inf")
         min_index = -1
@@ -54,7 +53,6 @@ class Graph:
         return min_index
 
     def printPath(self, parent, j, path):
-
         if parent[j] == -1 :
             path.append(j)
             return path
@@ -112,8 +110,8 @@ def calcula_fi(path):
 def convert_to_lat_long(path):
     result = []
     for i in range(len(path)):
-        latCoord = lat[i]
-        longCoord = long[i]
+        latCoord = lat[path[i]]
+        longCoord = long[path[i]]
         result.append((latCoord, longCoord))
     return result
 
@@ -149,11 +147,8 @@ def calculate_routes(N):
 
     return rotas
 
-@app.route('/routing/<int:quant>', methods=['GET'])
-def routing(quant):
-    #N = int(request.form['number_of_products'])
-    rotas = calculate_routes(quant)
+@app.route('/routing', methods=['POST'])
+def routing():
+    N = int(request.form['number_of_products'])
+    rotas = calculate_routes(N)
     return jsonify(rotas)
-
-if __name__ == '__main__':
-    app.run(debug=True,host='0.0.0.0',port=8080)
